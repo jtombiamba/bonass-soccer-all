@@ -1,0 +1,22 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  background: #16213e;
+  color: #eee;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+a {
+  color: #0f3460;
+}
+
+input, button, select {
+  font-size: 1rem;
+}

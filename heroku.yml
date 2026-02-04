@@ -1,0 +1,15 @@
+# Heroku Docker deployment (heroku.yml)
+# https://devcenter.heroku.com/articles/heroku-yml-build-manifest
+# Deploy: heroku stack:set container && git push heroku main
+build:
+  docker:
+    web: backend/Dockerfile
+  config:
+    NEXT_PUBLIC_API_URL: https://your-backend.herokuapp.com
+run:
+  web: >
+    sh -c "python manage.py migrate --noinput &&
+           python manage.py collectstatic --noinput --clear || true &&
+           gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+  worker: celery -A config worker -l info
+  beat: celery -A config beat -l info

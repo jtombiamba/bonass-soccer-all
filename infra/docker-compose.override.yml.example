@@ -1,0 +1,5 @@
+# Copy to docker-compose.override.yml for local overrides (e.g. volumes for hot reload)
+# backend:
+#   volumes:
+#     - ../backend:/app
+#   command: python manage.py runserver 0.0.0.0:8000

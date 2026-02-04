@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bonass_soccer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install backend deps
+        working-directory: backend
+        run: poetry install
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/bonass_soccer
+          SECRET_KEY: test-secret
+          DEBUG: "true"
+          ALLOWED_HOSTS: "*"
+          CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+          CELERY_BROKER_URL: redis://localhost:6379/0
+        run: poetry run python manage.py migrate --noinput
+      - name: Run backend tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/bonass_soccer
+          SECRET_KEY: test-secret
+          DEBUG: "true"
+          ALLOWED_HOSTS: "*"
+          CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+          CELERY_BROKER_URL: redis://localhost:6379/0
+          DJANGO_SETTINGS_MODULE: config.settings
+        run: poetry run pytest -v
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci 2>/dev/null || npm install
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+        run: npm run build
