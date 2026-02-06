@@ -98,6 +98,32 @@ Examples are provided in `backend/.env.example`. Ensure `DEBUG=False` in product
 - **Coolify**: Use `infra/docker-compose.yml` or `infra/coolify-docker-compose.yml`; set env vars (SECRET_KEY, POSTGRES_PASSWORD, CORS_ALLOWED_ORIGINS, NEXT_PUBLIC_API_URL).
 - **Heroku**: See `heroku.yml` and `Procfile`; use Heroku Postgres and Redis add-ons, set config vars.
 
+### Automated Docker Image Builds with GitHub Container Registry
+
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically builds and pushes Docker images to GitHub Container Registry (GHCR) on every push to the `main` branch and on version tags (`v*`, `release-*`).
+
+**Image naming:**
+- Backend: `ghcr.io/<owner>/<repository>/backend:<tag>`
+- Frontend: `ghcr.io/<owner>/<repository>/frontend:<tag>`
+
+**Tags:**
+- `latest` – images built from the `main` branch.
+- `sha-<short_sha>` – commit‑based tag for reproducibility.
+- `<tag_name>` – for version tags (e.g., `v1.0.0`).
+
+**How to use with Coolify:**
+
+1. **Registry authentication** – In Coolify, add a Docker registry for `ghcr.io` using a GitHub Personal Access Token with `read:packages` scope.
+2. **Pre‑built images** – Use the provided `infra/coolify-pull.yml` compose file, which references the pre‑built images instead of building from source.
+3. **Environment variables** – Set `GITHUB_REPOSITORY` (e.g., `owner/repo`) and optionally `IMAGE_TAG` (defaults to `latest`) in Coolify’s resource configuration, alongside the other required variables (SECRET_KEY, POSTGRES_PASSWORD, etc.).
+
+**Workflow:**
+- Push to `main` → images are built, tagged with `latest` and `sha-<short_sha>`, and pushed to GHCR.
+- Create a Git tag → images are tagged with the tag name and `sha-<short_sha>`.
+- Coolify can then deploy the new images by updating the `IMAGE_TAG` environment variable or by using the `latest` tag (not recommended for production).
+
+For more details, see the [CI/CD plan](plans/docker-registry-ci.md).
+
 ## Tests
 
 - Backend: `cd backend && poetry run pytest -v`
