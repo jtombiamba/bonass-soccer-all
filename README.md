@@ -62,7 +62,36 @@ docker-compose up -d
 
 Backend: http://localhost:8000  
 API docs: http://localhost:8000/api/docs/  
-Frontend: http://localhost:3000  
+Frontend: http://localhost:3000
+
+## Email Testing (Development)
+
+For local email testing, the project includes a [MailHog](https://github.com/mailhog/MailHog) service that captures outgoing emails and provides a web interface to inspect them.
+
+To start MailHog alongside the other services, use the development override compose file:
+
+```bash
+cd infra
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+MailHog's SMTP server will be available at `mailhog:1025` inside the Docker network, and the web UI at http://localhost:8025.
+
+The Django backend is configured to automatically use MailHog when `DEBUG=True` (default in development). No extra environment variables are needed. If you wish to use a different email backend, you can override the settings in `backend/.env` (see the commented examples in `backend/.env.example`).
+
+## Email Configuration for Production
+
+In production, you must configure a real SMTP server to send emails. Set the following environment variables in your production environment (e.g., in Coolify/Heroku config vars, or in `backend/.env`):
+
+- `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend`
+- `EMAIL_HOST` (your SMTP server address)
+- `EMAIL_PORT` (usually 587 for TLS)
+- `EMAIL_HOST_USER` (your SMTP username)
+- `EMAIL_HOST_PASSWORD` (your SMTP password)
+- `EMAIL_USE_TLS=True` (or `False` if using SSL)
+- `DEFAULT_FROM_EMAIL` (sender address)
+
+Examples are provided in `backend/.env.example`. Ensure `DEBUG=False` in production.
 
 ## Deploy (Coolify / Heroku)
 
