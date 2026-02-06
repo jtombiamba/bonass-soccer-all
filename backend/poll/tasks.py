@@ -8,6 +8,7 @@ from datetime import timedelta
 from players.models import Game, Organization
 from evaluations.models import EvaluationRound
 from poll.models import WeeklyPoll
+from core.email import send_poll_scheduled_email
 
 
 def next_friday():
@@ -30,7 +31,13 @@ def launch_weekly_poll():
     if Game.objects.filter(organization=org, game_date=friday).exists():
         return
     game = Game.objects.create(organization=org, game_date=friday)
-    WeeklyPoll.objects.create(game=game)
+    poll = WeeklyPoll.objects.create(game=game)
+
+    # Notify all players of the organization
+    players = org.players.select_related("user").filter(user__email__isnull=False).exclude(user__email="")
+    for player in players:
+        send_poll_scheduled_email(player, poll)
+
     return {"game_id": game.id, "game_date": str(friday)}
 
 
