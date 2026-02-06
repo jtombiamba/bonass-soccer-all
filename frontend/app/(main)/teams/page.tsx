@@ -27,16 +27,21 @@ interface Game {
 }
 
 export default function TeamsPage() {
-  const [games, setGames] = useState<{ id: number; game_date: string; team_a_goals: number; team_b_goals: number }[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentPlayerPseudo, setCurrentPlayerPseudo] = useState<string | null>(null);
   const [physicalScore, setPhysicalScore] = useState<Record<number, string>>({});
   const [scoreForm, setScoreForm] = useState<Record<number, { a: string; b: string }>>({});
   const [assignCode, setAssignCode] = useState<Record<number, string>>({});
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    api.get<typeof games>("players/games/").then(({ data }) => setGames(Array.isArray(data) ? data : [])).catch(() => setGames([])).finally(() => setLoading(false));
+    api.get<Game[]>("players/games/").then(({ data }) => setGames(Array.isArray(data) ? data : [])).catch(() => setGames([])).finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    api.get("players/me/").then(({ data }) => setCurrentPlayerPseudo(data.pseudo)).catch(() => setCurrentPlayerPseudo(null));
   }, []);
 
   async function loadGameDetails(gameId: number) {
@@ -128,11 +133,23 @@ export default function TeamsPage() {
                 <input type="number" min={0} value={scoreForm[game.id]?.b ?? ""} onChange={(e) => setScoreForm((s) => ({ ...s, [game.id]: { ...(s[game.id] || { a: "", b: "" }), b: e.target.value } }))} style={{ width: 50, padding: 6, borderRadius: 6, backgroundColor: "#0f3460", color: "#eee" }} />
                 <button type="button" onClick={() => submitScore(game.id)} style={btnStyle}>Save score</button>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <label>Distribution code:</label>
-                <input type="text" value={assignCode[game.id] ?? ""} onChange={(e) => setAssignCode((s) => ({ ...s, [game.id]: e.target.value }))} placeholder="Code received" style={{ width: 200, padding: 6, borderRadius: 6, backgroundColor: "#0f3460", color: "#eee" }} />
-                <button type="button" onClick={() => launchDistribution(game.id)} style={btnStyle}>Launch teams</button>
-              </div>
+              {game.distribution_code ? (
+                game.code_sent_to_player_pseudo === currentPlayerPseudo ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <label>Distribution code:</label>
+                    <input type="text" value={assignCode[game.id] ?? ""} onChange={(e) => setAssignCode((s) => ({ ...s, [game.id]: e.target.value }))} placeholder="Code received" style={{ width: 200, padding: 6, borderRadius: 6, backgroundColor: "#0f3460", color: "#eee" }} />
+                    <button type="button" onClick={() => launchDistribution(game.id)} style={btnStyle}>Launch teams</button>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 14, color: "#aaa" }}>
+                    Distribution code already sent to <strong>{game.code_sent_to_player_pseudo}</strong>.
+                  </div>
+                )
+              ) : (
+                <div style={{ fontSize: 14, color: "#aaa" }}>
+                  No distribution code yet.
+                </div>
+              )}
             </div>
             <button type="button" onClick={() => selectedGame?.id === game.id ? setSelectedGame(null) : loadGameDetails(game.id)} style={{ marginTop: 8, ...btnStyle }}>
               {selectedGame?.id === game.id ? "Hide teams" : "Show teams"}

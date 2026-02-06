@@ -3,7 +3,7 @@ Email utilities for the football management system.
 """
 from django.conf import settings
 from django.core.mail import send_mail
-from players.models import Player
+from players.models import Player, Game
 from poll.models import WeeklyPoll
 from evaluations.models import EvaluationAssignment
 
@@ -26,6 +26,49 @@ Please indicate whether you will be available by answering the poll at:
 {poll_url}
 
 You can answer "Available" or "Not available".
+
+See you on the pitch!
+
+— Your football team manager
+"""
+    recipient_email = player.user.email
+    if not recipient_email:
+        return False
+
+    try:
+        send_mail(
+            subject,
+            message.strip(),
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+            fail_silently=False,
+        )
+        return True
+    except Exception:
+        # Log the error in production
+        return False
+
+
+def send_distribution_code_email(player: Player, game: Game, code: str) -> bool:
+    """
+    Send an email to a player with the distribution code for team generation.
+    Returns True if the email was sent successfully, False otherwise.
+    """
+    subject = f"Distribution code for game on {game.game_date:%A, %d %B %Y}"
+    frontend_url = settings.FRONTEND_BASE_URL.rstrip("/")
+    teams_url = f"{frontend_url}/teams"
+
+    message = f"""
+Hello {player.pseudo},
+
+You have been selected to generate teams for the upcoming Friday game ({game.game_date:%d/%m/%Y}).
+
+Your distribution code is: {code}
+
+Please go to the teams page and enter this code to generate teams:
+{teams_url}
+
+Only you can generate the teams. Keep this code confidential.
 
 See you on the pitch!
 

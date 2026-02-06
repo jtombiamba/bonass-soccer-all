@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from players.models import Player
 from .models import WeeklyPoll, PollResponse
 from .serializers import WeeklyPollSerializer, AnswerPollSerializer
+from .services import update_poll_lock
 
 
 def get_current_player(request):
@@ -37,8 +38,11 @@ class AnswerPollView(generics.GenericAPIView):
             return Response({"detail": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
         if poll.game.organization_id != player.organization_id:
             return Response({"detail": "Not your organization's poll."}, status=status.HTTP_403_FORBIDDEN)
+        if poll.is_locked:
+            return Response({"detail": "Poll is locked. You cannot change your answer."}, status=status.HTTP_400_BAD_REQUEST)
         obj, created = PollResponse.objects.update_or_create(
             poll=poll, player=player,
             defaults={"available": serializer.validated_data["available"]},
         )
+        update_poll_lock(poll)
         return Response({"detail": "Poll answered.", "available": obj.available}, status=status.HTTP_200_OK)

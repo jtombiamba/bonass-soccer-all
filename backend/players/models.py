@@ -37,6 +37,12 @@ class Game(models.Model):
     code_sent_to_player = models.ForeignKey(
         Player, null=True, blank=True, on_delete=models.SET_NULL, related_name="codes_received"
     )
+    status = models.CharField(max_length=20, choices=[
+        ("pending", "Pending"),
+        ("confirmed", "Confirmed"),
+        ("cancelled", "Cancelled"),
+    ], default="pending")
+    confirmed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

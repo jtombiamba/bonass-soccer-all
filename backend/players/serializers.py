@@ -54,16 +54,20 @@ class GameSerializer(serializers.ModelSerializer):
         model = Game
         fields = (
             "id", "organization", "game_date", "team_a_goals", "team_b_goals",
-            "distribution_code", "code_sent_to_player", "code_sent_to_player_pseudo", "teams", "created_at",
+            "distribution_code", "code_sent_to_player", "code_sent_to_player_pseudo",
+            "status", "confirmed_at", "teams", "created_at",
         )
-        read_only_fields = ("distribution_code", "code_sent_to_player")
+        read_only_fields = ("distribution_code", "code_sent_to_player", "status", "confirmed_at")
 
 
 class GameListSerializer(serializers.ModelSerializer):
     """Light list view."""
+    distribution_code = serializers.CharField(read_only=True)
+    code_sent_to_player_pseudo = serializers.CharField(source="code_sent_to_player.pseudo", read_only=True)
+
     class Meta:
         model = Game
-        fields = ("id", "game_date", "team_a_goals", "team_b_goals", "created_at")
+        fields = ("id", "game_date", "status", "team_a_goals", "team_b_goals", "distribution_code", "code_sent_to_player_pseudo", "created_at")
 
 
 class SubmitScoreSerializer(serializers.Serializer):
