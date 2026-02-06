@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from players.models import Player
 from poll.models import WeeklyPoll
+from evaluations.models import EvaluationAssignment
 
 
 def send_poll_scheduled_email(player: Player, poll: WeeklyPoll) -> bool:
@@ -27,6 +28,58 @@ Please indicate whether you will be available by answering the poll at:
 You can answer "Available" or "Not available".
 
 See you on the pitch!
+
+— Your football team manager
+"""
+    recipient_email = player.user.email
+    if not recipient_email:
+        return False
+
+    try:
+        send_mail(
+            subject,
+            message.strip(),
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+            fail_silently=False,
+        )
+        return True
+    except Exception:
+        # Log the error in production
+        return False
+
+
+def send_evaluation_assignment_email(player: Player, evaluation_round) -> bool:
+    """
+    Send an email to a player with their monthly evaluation assignments.
+    Returns True if the email was sent successfully, False otherwise.
+    """
+    assignments = EvaluationAssignment.objects.filter(
+        round=evaluation_round, evaluator=player
+    ).select_related("evaluated")
+    if not assignments:
+        # No assignments, maybe skip
+        return False
+
+    pseudo_list = ", ".join(ass.evaluated.pseudo for ass in assignments)
+    subject = f"Monthly player evaluations are open"
+    frontend_url = settings.FRONTEND_BASE_URL.rstrip("/")
+    eval_url = f"{frontend_url}/evaluations"
+
+    message = f"""
+Hello {player.pseudo},
+
+The monthly player evaluation round for {evaluation_round.year}-{evaluation_round.month:02d} is now open.
+
+You have been assigned to evaluate the following players:
+{pseudo_list}
+
+Please submit your evaluations at:
+{eval_url}
+
+You can evaluate each player on pace, assist, defensive, dribbling, and shooting skills (0–100).
+
+Thank you for helping improve the team!
 
 — Your football team manager
 """

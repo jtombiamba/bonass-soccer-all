@@ -29,3 +29,15 @@ class SkillEvaluation(models.Model):
     class Meta:
         db_table = "evaluations_skill"
         unique_together = [["round", "evaluator", "evaluated"]]
+
+
+class EvaluationAssignment(models.Model):
+    """Monthly assignment of which players a given player should evaluate."""
+    round = models.ForeignKey(EvaluationRound, on_delete=models.CASCADE, related_name="assignments")
+    evaluator = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="assigned_evaluations_given")
+    evaluated = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="assigned_evaluations_received")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "evaluations_assignment"
+        unique_together = [["round", "evaluator", "evaluated"]]

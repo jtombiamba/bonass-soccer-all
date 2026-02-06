@@ -4,8 +4,8 @@ from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 
 from players.models import Player
-from .models import EvaluationRound, SkillEvaluation
-from .serializers import SkillEvaluationSerializer, SkillEvaluationCreateSerializer, EvaluationRoundSerializer
+from .models import EvaluationRound, SkillEvaluation, EvaluationAssignment
+from .serializers import SkillEvaluationSerializer, SkillEvaluationCreateSerializer, EvaluationRoundSerializer, EvaluationAssignmentSerializer
 
 
 def get_current_player(request):
@@ -41,6 +41,9 @@ class EvaluateView(generics.ListCreateAPIView):
         r = get_current_round()
         if not r:
             raise ValueError("No evaluation round for this month")
+        evaluated = serializer.validated_data.get('evaluated')
+        if evaluated == player:
+            raise ValidationError("You cannot evaluate yourself.")
         count = SkillEvaluation.objects.filter(round=r, evaluator=player).count()
         if count >= 5:
             raise ValidationError("You can evaluate at most 5 players per round.")
@@ -59,3 +62,17 @@ class EvaluationRoundsListView(generics.ListAPIView):
     """List evaluation rounds (for UI)."""
     queryset = EvaluationRound.objects.all()
     serializer_class = EvaluationRoundSerializer
+
+
+class AssignmentsView(generics.ListAPIView):
+    """List assigned players for the current player in the current round."""
+    serializer_class = EvaluationAssignmentSerializer
+
+    def get_queryset(self):
+        player = get_current_player(self.request)
+        if not player:
+            return EvaluationAssignment.objects.none()
+        r = get_current_round()
+        if not r:
+            return EvaluationAssignment.objects.none()
+        return EvaluationAssignment.objects.filter(round=r, evaluator=player).select_related("evaluated")

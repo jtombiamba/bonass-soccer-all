@@ -40,3 +40,13 @@ class EvaluationRoundSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluationRound
         fields = ("id", "year", "month", "created_at")
+
+
+class EvaluationAssignmentSerializer(serializers.ModelSerializer):
+    evaluated_id = serializers.IntegerField(source="evaluated.id", read_only=True)
+    evaluated_pseudo = serializers.CharField(source="evaluated.pseudo", read_only=True)
+
+    class Meta:
+        model = EvaluationAssignment
+        fields = ("id", "round", "evaluator", "evaluated", "evaluated_id", "evaluated_pseudo", "created_at")
+        read_only_fields = ("round", "evaluator", "evaluated")

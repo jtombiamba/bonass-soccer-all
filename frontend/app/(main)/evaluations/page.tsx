@@ -21,9 +21,17 @@ interface PlayerOption {
   pseudo: string;
 }
 
+interface Assignment {
+  id: number;
+  round: number;
+  evaluated: number;
+  evaluated_pseudo: string;
+}
+
 export default function EvaluationsPage() {
   const [list, setList] = useState<SkillEval[]>([]);
   const [playerOptions, setPlayerOptions] = useState<PlayerOption[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     evaluated: "",
@@ -39,6 +47,7 @@ export default function EvaluationsPage() {
   useEffect(() => {
     api.get<SkillEval[]>("evaluations/evaluate/").then(({ data }) => setList(data)).catch(() => setList([]));
     api.get<PlayerOption[]>("players/").then(({ data }) => setPlayerOptions(Array.isArray(data) ? data : [])).catch(() => setPlayerOptions([]));
+    api.get<Assignment[]>("evaluations/assignments/").then(({ data }) => setAssignments(Array.isArray(data) ? data : [])).catch(() => setAssignments([]));
     setLoading(false);
   }, []);
 
@@ -88,6 +97,39 @@ export default function EvaluationsPage() {
       <p style={{ marginTop: 8, marginBottom: 16 }}>
         Evaluate up to 5 players per month (0–100): pace, assist, defensive, dribbling, shooting.
       </p>
+      {assignments.length > 0 && (
+        <section style={{ marginBottom: 24 }}>
+          <h2>Assigned Players to Evaluate</h2>
+          <p style={{ fontSize: 14, color: "#aaa", marginBottom: 12 }}>
+            You have been assigned to evaluate the following players this month.
+            Click a player to pre‑fill the form below.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+            {assignments.map((a) => {
+              const alreadyEvaluated = list.some(e => e.evaluated === a.evaluated);
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => setForm({ ...form, evaluated: a.evaluated.toString() })}
+                  disabled={alreadyEvaluated || list.length >= 5}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: alreadyEvaluated ? "#333" : (list.length >= 5 ? "#333" : "#1a1a2e"),
+                    color: alreadyEvaluated ? "#888" : "#eee",
+                    border: "1px solid #444",
+                    borderRadius: 6,
+                    cursor: alreadyEvaluated ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {a.evaluated_pseudo}
+                  {alreadyEvaluated && " (already evaluated)"}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
       <section style={{ marginBottom: 24 }}>
         <h2>My evaluations this round</h2>
         <ul style={{ listStyle: "none" }}>

@@ -7,8 +7,9 @@ from datetime import timedelta
 
 from players.models import Game, Organization
 from evaluations.models import EvaluationRound
+from evaluations.services import assign_all_organizations
 from poll.models import WeeklyPoll
-from core.email import send_poll_scheduled_email
+from core.email import send_poll_scheduled_email, send_evaluation_assignment_email
 
 
 def next_friday():
@@ -44,11 +45,23 @@ def launch_weekly_poll():
 @shared_task
 def launch_monthly_evaluation_round():
     """
-    Run 1st of month: create EvaluationRound for current year/month.
+    Run 1st of month: create EvaluationRound for current year/month,
+    generate evaluation assignments, and notify players by email.
     """
     now = timezone.now()
-    _, created = EvaluationRound.objects.get_or_create(year=now.year, month=now.month)
-    return {"year": now.year, "month": now.month, "created": created}
+    round_obj, created = EvaluationRound.objects.get_or_create(year=now.year, month=now.month)
+
+    # Generate assignments for all organizations (single tenant)
+    assign_all_organizations()
+
+    # Send email notifications to each player with assignments
+    org = Organization.objects.first()
+    if org:
+        players = org.players.select_related("user").filter(user__email__isnull=False).exclude(user__email="")
+        for player in players:
+            send_evaluation_assignment_email(player, round_obj)
+
+    return {"year": now.year, "month": now.month, "created": created, "assignments_generated": True}
 
 
 @shared_task
