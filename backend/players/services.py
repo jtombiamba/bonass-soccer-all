@@ -52,18 +52,18 @@ def compute_final_score(player, game):
     return round(score, 2)
 
 
-def assign_teams_by_weighted_scores(game, player_ids_or_queryset):
+def assign_teams_by_weighted_scores(game, player_ids_or_queryset: list):
     """
     Split players into two teams by balancing total weighted score.
     player_ids_or_queryset: list of Player ids or queryset of Players (available for this game).
     """
-    if hasattr(player_ids_or_queryset, "__iter__") and not isinstance(player_ids_or_queryset, type(Player.objects.none())):
-        if player_ids_or_queryset and hasattr(next(iter(player_ids_or_queryset), "id", None):
-            players = list(player_ids_or_queryset)
-        else:
-            players = list(Player.objects.filter(id__in=player_ids_or_queryset))
-    else:
-        players = list(player_ids_or_queryset)
+    # if hasattr(player_ids_or_queryset, "__iter__") and not isinstance(player_ids_or_queryset, type(Player.objects.none())):
+    #     if player_ids_or_queryset and hasattr(next(iter(player_ids_or_queryset), "id", None):
+    #         players = list(player_ids_or_queryset)
+    #     else:
+    players = list(Player.objects.filter(id__in=player_ids_or_queryset))
+    # else:
+    #     players = list(player_ids_or_queryset)
     if not players:
         return
     # Shuffle then sort by score descending for deterministic but "random" split

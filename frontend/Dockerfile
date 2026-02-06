@@ -11,6 +11,9 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Create public directory if it doesn't exist
+RUN mkdir -p public
+
 RUN npm run build
 
 FROM base AS runner

@@ -11,7 +11,7 @@ from .serializers import (
     GameListSerializer,
     PhysicalConditionReportSerializer,
     SubmitScoreSerializer,
-    AssignCodeAndTeamsSerializer,
+    AssignCodeAndTeamsSerializer, PlayerMinSerializer,
 )
 from .services import compute_final_score, assign_teams_by_weighted_scores
 

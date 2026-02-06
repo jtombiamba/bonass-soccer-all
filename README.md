@@ -27,9 +27,13 @@ Web application for a group of friends to schedule Friday games, run weekly avai
 
 ### Backend
 
+The backend uses **pyenv** for the virtual environment (see `backend/.python-version`). After installing pyenv:
+
 ```bash
 cd backend
-cp .env.example .env   # edit DATABASE_URL, SECRET_KEY, CELERY_BROKER_URL
+pyenv install -s        # install Python from .python-version if needed
+pyenv local 3.11.7      # or whatever version is in .python-version
+cp .env.example .env    # edit DATABASE_URL, SECRET_KEY, CELERY_BROKER_URL
 poetry install
 poetry run python manage.py migrate
 poetry run python manage.py runserver

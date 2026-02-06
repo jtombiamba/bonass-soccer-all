@@ -1,42 +1,57 @@
 # backend/pyproject.toml
-[tool.poetry]
+[project]
 name = "bonass-soccer-backend"
 version = "1.0.0"
 description = "Football Team Management Backend"
-authors = ["Bonass Soccer Team"]
+authors = [
+    {name = "Bonass Soccer Team"}
+]
 readme = "README.md"
+requires-python = ">=3.11,<4.0"
+license = {text = "MIT"}  # Added - specify your license
+classifiers = [  # Added - PyPI classifiers
+    "Development Status :: 4 - Beta",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Programming Language :: Python :: 3.11",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-Django = "^4.2"
-djangorestframework = "^3.14"
-django-cors-headers = "^4.2"
-django-filter = "^23.3"
-psycopg2-binary = "^2.9"
-celery = "^5.3"
-redis = "^5.0"
-django-celery-beat = "^2.5"
-django-celery-results = "^2.5"
-drf-spectacular = "^0.27"
-djangorestframework-simplejwt = "^5.3"
-django-environ = "^0.11"
-python-dotenv = "^1.0"
-gunicorn = "^21.2"
+dependencies = [
+    "Django>=4.2,<5.0",
+    "djangorestframework>=3.14,<4.0",
+    "django-cors-headers>=4.2,<5.0",
+    "django-filter>=23.3,<24.0",
+    "psycopg2-binary>=2.9,<3.0",
+    "celery>=5.3,<6.0",
+    "redis>=5.0,<6.0",
+    "django-celery-beat>=2.5,<3.0",
+    "django-celery-results>=2.5,<3.0",
+    "drf-spectacular>=0.27,<0.28",
+    "djangorestframework-simplejwt>=5.3,<6.0",
+    "django-environ>=0.11,<0.12",
+    "python-dotenv>=1.0,<2.0",
+    "gunicorn>=21.2,<22.0",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4"
-pytest-django = "^4.5"
-pytest-factoryboy = "^2.5"
-factory-boy = "^3.3"
-faker = "^21.1"
-black = "^23.11"
-flake8 = "^6.1"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4,<8.0",
+    "pytest-django>=4.5,<5.0",
+    "pytest-factoryboy>=2.5,<3.0",
+    "factory-boy>=3.3,<4.0",
+    "faker>=21.1,<=22.0",
+    "black>=23.11,<24.0",
+    "flake8>=6.1,<7.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["auth_app", "config", "evaluations", "players", "poll"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["test_*.py", "*_test.py"]
 addopts = "-v --tb=short"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
