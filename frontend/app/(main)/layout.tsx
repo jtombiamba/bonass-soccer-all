@@ -20,7 +20,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <Header />
-      <main style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>{children}</main>
+      <main className="main-content">{children}</main>
     </>
   );
 }

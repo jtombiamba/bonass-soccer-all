@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import EvaluationRound, SkillEvaluation
+from .models import EvaluationRound, SkillEvaluation, EvaluationAssignment
 from players.models import Player
 
 

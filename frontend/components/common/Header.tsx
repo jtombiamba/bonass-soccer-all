@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -7,38 +8,39 @@ export default function Header() {
   const { user, logout } = useAuth();
 
   return (
-    <header style={headerStyle}>
-      <nav style={navStyle}>
-        <Link href="/dashboard" style={linkStyle}>Dashboard</Link>
-        <Link href="/polls" style={linkStyle}>Polls</Link>
-        <Link href="/evaluations" style={linkStyle}>Evaluations</Link>
-        <Link href="/teams" style={linkStyle}>Teams</Link>
-        <Link href="/profile" style={linkStyle}>Profile</Link>
+    <header className="header">
+      <nav style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+        <Link href="/dashboard" style={{ color: "#eee", textDecoration: "none", fontWeight: 500 }}>
+          Dashboard
+        </Link>
+        <Link href="/polls" style={{ color: "#eee", textDecoration: "none", fontWeight: 500 }}>
+          Polls
+        </Link>
+        <Link href="/evaluations" style={{ color: "#eee", textDecoration: "none", fontWeight: 500 }}>
+          Evaluations
+        </Link>
+        <Link href="/teams" style={{ color: "#eee", textDecoration: "none", fontWeight: 500 }}>
+          Teams
+        </Link>
+        <Link href="/profile" style={{ color: "#eee", textDecoration: "none", fontWeight: 500 }}>
+          Profile
+        </Link>
       </nav>
-      <div style={userStyle}>
-        {user && <span style={{ marginRight: 12 }}>{user.username}</span>}
-        <button type="button" onClick={logout} style={buttonStyle}>Logout</button>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        {user && (
+          <span style={{ color: "#fff", fontWeight: 500 }}>
+            {user.username}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={logout}
+          className="btn btn-danger"
+          style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+        >
+          Logout
+        </button>
       </div>
     </header>
   );
 }
-
-const headerStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "12px 24px",
-  backgroundColor: "#1a1a2e",
-  color: "#eee",
-};
-const navStyle: React.CSSProperties = { display: "flex", gap: 20 };
-const linkStyle: React.CSSProperties = { color: "#eee", textDecoration: "none" };
-const userStyle: React.CSSProperties = { display: "flex", alignItems: "center" };
-const buttonStyle: React.CSSProperties = {
-  padding: "6px 12px",
-  backgroundColor: "#e94560",
-  border: "none",
-  borderRadius: 4,
-  color: "#fff",
-  cursor: "pointer",
-};
