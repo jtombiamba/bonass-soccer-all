@@ -129,12 +129,16 @@ The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) 
 - `latest` – images built from the `main` branch.
 - `sha-<short_sha>` – commit‑based tag for reproducibility.
 - `<tag_name>` – for version tags (e.g., `v1.0.0`).
-
 **How to use with Coolify:**
 
 1. **Registry authentication** – In Coolify, add a Docker registry for `ghcr.io` using a GitHub Personal Access Token with `read:packages` scope.
 2. **Pre‑built images** – Use the provided `infra/coolify-pull.yml` compose file, which references the pre‑built images instead of building from source.
 3. **Environment variables** – Set `GITHUB_REPOSITORY` (e.g., `owner/repo`) and optionally `IMAGE_TAG` (defaults to `latest`) in Coolify’s resource configuration, alongside the other required variables (SECRET_KEY, POSTGRES_PASSWORD, etc.).
+4. **Subdomain routing** – To expose services on custom subdomains, the compose file includes Coolify routing labels:
+   - Backend: `api.bonass-soccer.tombislab.com` (port 8000, HTTPS)
+   - Frontend: `app.bonass-soccer.tombislab.com` (port 3000, HTTPS)
+   Adjust these labels in `infra/coolify-pull.yml` to match your domain. Ensure CORS_ALLOWED_ORIGINS includes the frontend domain and NEXT_PUBLIC_API_URL points to the backend domain.
+
 
 **Workflow:**
 - Push to `main` → images are built, tagged with `latest` and `sha-<short_sha>`, and pushed to GHCR.

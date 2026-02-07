@@ -36,6 +36,10 @@ services:
       - postgres
       - redis
     restart: unless-stopped
+    labels:
+      - coolify.service.domain=api.bonass-soccer.tombislab.com
+      - coolify.service.port=8000
+      - coolify.service.https=true
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput --clear || true &&
@@ -62,7 +66,6 @@ services:
       - celery-worker
     restart: unless-stopped
     command: celery -A config beat -l info
-
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY:-owner/repo}/frontend:${IMAGE_TAG:-latest}
     environment:
@@ -70,6 +73,11 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    labels:
+      - coolify.service.domain=app.bonass-soccer.tombislab.com
+      - coolify.service.port=3000
+      - coolify.service.https=true
+
 
 volumes:
   postgres_data:
