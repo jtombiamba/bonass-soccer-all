@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from players.models import Player, Game
 from poll.models import WeeklyPoll
 from evaluations.models import EvaluationAssignment
+from auth_app.models import User
 
 
 def send_poll_scheduled_email(player: Player, poll: WeeklyPoll) -> bool:
@@ -127,6 +128,47 @@ Thank you for helping improve the team!
 — Your football team manager
 """
     recipient_email = player.user.email
+    if not recipient_email:
+        return False
+
+    try:
+        send_mail(
+            subject,
+            message.strip(),
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+            fail_silently=False,
+        )
+        return True
+    except Exception:
+        # Log the error in production
+        return False
+
+
+def send_password_reset_email(user: User, token: str) -> bool:
+    """
+    Send a password reset email to a user with a reset link containing the token.
+    Returns True if the email was sent successfully, False otherwise.
+    """
+    subject = "Password Reset Request"
+    frontend_url = settings.FRONTEND_BASE_URL.rstrip("/")
+    reset_url = f"{frontend_url}/reset-password?token={token}"
+
+    message = f"""
+Hello {user.username},
+
+You have requested to reset your password for the Football Team Management system.
+
+Please click the following link to set a new password:
+{reset_url}
+
+If you did not request this password reset, you can safely ignore this email.
+
+This link will expire in 1 hour.
+
+— Your football team manager
+"""
+    recipient_email = user.email
     if not recipient_email:
         return False
 

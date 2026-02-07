@@ -93,6 +93,25 @@ In production, you must configure a real SMTP server to send emails. Set the fol
 
 Examples are provided in `backend/.env.example`. Ensure `DEBUG=False` in production.
 
+### Superuser Creation
+
+When deploying the application, a superuser is automatically created if it does not already exist. The superuser credentials are read from the following environment variables:
+
+- `ADMIN_USERNAME` (default: `admin`)
+- `ADMIN_PASSWORD` (default: `changeme`)
+- `ADMIN_EMAIL` (default: `admin@example.com`)
+
+These variables are optional; if any of them is missing, superuser creation will be skipped. The superuser can be used to access the Django admin interface at `/admin/`.
+
+### Password Reset
+
+The API provides password reset endpoints that use JWT tokens sent via email:
+
+- `POST /api/auth/password-reset/` – request a reset token (requires email)
+- `POST /api/auth/password-reset/confirm/` – confirm reset with token and new password
+
+The reset token is valid for 1 hour (configurable via `SIMPLE_JWT.PASSWORD_RESET_TOKEN_LIFETIME`). Emails are sent using the configured email backend (see Email Configuration above).
+
 ## Deploy (Coolify / Heroku)
 
 - **Coolify**: Use `infra/docker-compose.yml` or `infra/coolify-docker-compose.yml`; set env vars (SECRET_KEY, POSTGRES_PASSWORD, CORS_ALLOWED_ORIGINS, NEXT_PUBLIC_API_URL).
