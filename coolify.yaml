@@ -1,0 +1,6 @@
+# Coolify deployment: use Docker Compose from infra/
+# In Coolify: New Resource -> Docker Compose, point to this repo and compose file infra/docker-compose.yml
+# Set env vars: POSTGRES_PASSWORD, SECRET_KEY, CORS_ALLOWED_ORIGINS, NEXT_PUBLIC_API_URL (public backend URL)
+version: "3.8"
+# This file is a reference; actual compose is in infra/docker-compose.yml
+# Coolify will use: Build context = repo root, Compose file = infra/docker-compose.yml

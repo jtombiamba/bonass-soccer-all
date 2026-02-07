@@ -1,0 +1,83 @@
+# Coolify deployment using pre-built images from GitHub Container Registry
+# Set env in Coolify:
+# - GITHUB_REPOSITORY (e.g., "owner/repo")
+# - IMAGE_TAG (optional, defaults to 'latest')
+# - SECRET_KEY, POSTGRES_PASSWORD, CORS_ALLOWED_ORIGINS, NEXT_PUBLIC_API_URL
+#
+# Also configure Docker registry authentication in Coolify:
+# Resources -> Your resource -> Docker Registries -> Add Registry (ghcr.io)
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-bonass_soccer}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-owner/repo}/backend:${IMAGE_TAG:-latest}
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-bonass_soccer}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_HOSTS: "*"
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      DEBUG: "false"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    labels:
+      - coolify.service.domain=api.bonass-soccer.tombislab.com
+      - coolify.service.port=8000
+      - coolify.service.https=true
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput --clear || true &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
+
+  celery-worker:
+    image: ghcr.io/${GITHUB_REPOSITORY:-owner/repo}/backend:${IMAGE_TAG:-latest}
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-bonass_soccer}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    command: celery -A config worker -l info
+
+  celery-beat:
+    image: ghcr.io/${GITHUB_REPOSITORY:-owner/repo}/backend:${IMAGE_TAG:-latest}
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-bonass_soccer}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      - celery-worker
+    restart: unless-stopped
+    command: celery -A config beat -l info
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-owner/repo}/frontend:${IMAGE_TAG:-latest}
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    labels:
+      - coolify.service.domain=app.bonass-soccer.tombislab.com
+      - coolify.service.port=3000
+      - coolify.service.https=true
+
+
+volumes:
+  postgres_data:

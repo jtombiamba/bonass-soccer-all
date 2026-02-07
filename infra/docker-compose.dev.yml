@@ -1,0 +1,12 @@
+# Docker Compose development overrides for MailHog email testing
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+version: "3.8"
+
+services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - default

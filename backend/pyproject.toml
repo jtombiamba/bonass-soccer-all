@@ -1,0 +1,57 @@
+# backend/pyproject.toml
+[project]
+name = "bonass-soccer-backend"
+version = "1.0.0"
+description = "Football Team Management Backend"
+authors = [
+    {name = "Bonass Soccer Team"}
+]
+readme = "README.md"
+requires-python = ">=3.11,<4.0"
+license = {text = "MIT"}  # Added - specify your license
+classifiers = [  # Added - PyPI classifiers
+    "Development Status :: 4 - Beta",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "Django>=4.2,<5.0",
+    "djangorestframework>=3.14,<4.0",
+    "django-cors-headers>=4.2,<5.0",
+    "django-filter>=23.3,<24.0",
+    "psycopg2-binary>=2.9,<3.0",
+    "celery>=5.3,<6.0",
+    "redis>=5.0,<6.0",
+    "django-celery-beat>=2.5,<3.0",
+    "django-celery-results>=2.5,<3.0",
+    "drf-spectacular>=0.27,<0.28",
+    "djangorestframework-simplejwt>=5.3,<6.0",
+    "django-environ>=0.11,<0.12",
+    "python-dotenv>=1.0,<2.0",
+    "gunicorn>=21.2,<22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4,<8.0",
+    "pytest-django>=4.5,<5.0",
+    "pytest-factoryboy>=2.5,<3.0",
+    "factory-boy>=3.3,<4.0",
+    "faker>=21.1,<=22.0",
+    "black>=23.11,<24.0",
+    "flake8>=6.1,<7.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["auth_app", "config", "evaluations", "players", "poll"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --tb=short"
