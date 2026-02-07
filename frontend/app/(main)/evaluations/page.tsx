@@ -89,22 +89,26 @@ export default function EvaluationsPage() {
   const skills = ["pace_skill", "assist_skill", "defensive_skill", "dribbling_skill", "shooting_skill"] as const;
   const labels: Record<string, string> = { pace_skill: "Pace", assist_skill: "Assist", defensive_skill: "Defensive", dribbling_skill: "Dribbling", shooting_skill: "Shooting" };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-white">Loading...</p>;
 
   return (
-    <div>
-      <h1>Monthly Evaluations</h1>
-      <p style={{ marginTop: 8, marginBottom: 16 }}>
-        Evaluate up to 5 players per month (0–100): pace, assist, defensive, dribbling, shooting.
-      </p>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">Monthly Evaluations</h1>
+        <p className="text-gray-300">
+          Evaluate up to 5 players per month (0–100): pace, assist, defensive, dribbling, shooting.
+        </p>
+      </div>
+
+      {/* Assigned Players */}
       {assignments.length > 0 && (
-        <section style={{ marginBottom: 24 }}>
-          <h2>Assigned Players to Evaluate</h2>
-          <p style={{ fontSize: 14, color: "#aaa", marginBottom: 12 }}>
+        <section className="card-modern">
+          <h2 className="text-xl font-bold text-white mb-3">Assigned Players to Evaluate</h2>
+          <p className="text-gray-300 mb-4">
             You have been assigned to evaluate the following players this month.
             Click a player to pre‑fill the form below.
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+          <div className="flex flex-wrap gap-3">
             {assignments.map((a) => {
               const alreadyEvaluated = list.some(e => e.evaluated === a.evaluated);
               return (
@@ -113,14 +117,10 @@ export default function EvaluationsPage() {
                   type="button"
                   onClick={() => setForm({ ...form, evaluated: a.evaluated.toString() })}
                   disabled={alreadyEvaluated || list.length >= 5}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor: alreadyEvaluated ? "#333" : (list.length >= 5 ? "#333" : "#1a1a2e"),
-                    color: alreadyEvaluated ? "#888" : "#eee",
-                    border: "1px solid #444",
-                    borderRadius: 6,
-                    cursor: alreadyEvaluated ? "not-allowed" : "pointer",
-                  }}
+                  className={`px-4 py-2 rounded-full border transition-colors ${alreadyEvaluated || list.length >= 5
+                      ? "bg-surface border-surface-light text-gray-500 cursor-not-allowed"
+                      : "bg-surface border-primary text-white hover:bg-primary hover:text-white"
+                    }`}
                 >
                   {a.evaluated_pseudo}
                   {alreadyEvaluated && " (already evaluated)"}
@@ -130,49 +130,77 @@ export default function EvaluationsPage() {
           </div>
         </section>
       )}
-      <section style={{ marginBottom: 24 }}>
-        <h2>My evaluations this round</h2>
-        <ul style={{ listStyle: "none" }}>
-          {list.map((e) => (
-            <li key={e.id} style={{ padding: 12, marginBottom: 8, backgroundColor: "#1a1a2e", borderRadius: 8 }}>
-              {e.evaluated_pseudo}: pace {e.pace_skill}, assist {e.assist_skill}, defensive {e.defensive_skill}, dribbling {e.dribbling_skill}, shooting {e.shooting_skill}
-            </li>
-          ))}
-        </ul>
-        {list.length >= 5 && <p>You have reached the limit of 5 evaluations this round.</p>}
+
+      {/* My evaluations */}
+      <section className="card-modern">
+        <h2 className="text-xl font-bold text-white mb-4">My evaluations this round</h2>
+        {list.length === 0 ? (
+          <p className="text-gray-400">No evaluations submitted yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {list.map((e) => (
+              <div key={e.id} className="bg-surface-light rounded-lg p-4">
+                <h3 className="font-bold text-white mb-2">{e.evaluated_pseudo}</h3>
+                <ul className="text-sm text-gray-300 space-y-1">
+                  <li>Pace: {e.pace_skill}</li>
+                  <li>Assist: {e.assist_skill}</li>
+                  <li>Defensive: {e.defensive_skill}</li>
+                  <li>Dribbling: {e.dribbling_skill}</li>
+                  <li>Shooting: {e.shooting_skill}</li>
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+        {list.length >= 5 && (
+          <p className="text-warning mt-4">You have reached the limit of 5 evaluations this round.</p>
+        )}
       </section>
-      <section>
-        <h2>Submit evaluation</h2>
-        <p style={{ fontSize: 14, color: "#aaa", marginBottom: 12 }}>Select a player and give scores 0–100. Create a player profile first if needed.</p>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 400 }}>
-          <label>
-            Player to evaluate
+
+      {/* Submit evaluation form */}
+      <section className="card-modern">
+        <h2 className="text-xl font-bold text-white mb-4">Submit evaluation</h2>
+        <p className="text-gray-300 mb-6">
+          Select a player and give scores 0–100. Create a player profile first if needed.
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+          <div>
+            <label className="block text-white mb-2">Player to evaluate</label>
             <select
               value={form.evaluated}
               onChange={(e) => setForm({ ...form, evaluated: e.target.value })}
-              style={{ display: "block", marginTop: 4, padding: 8, width: "100%", borderRadius: 6, backgroundColor: "#1a1a2e", color: "#eee" }}
+              className="input w-full"
             >
               <option value="">-- Select --</option>
               {playerOptions.map((p) => (
                 <option key={p.id} value={p.id}>{p.pseudo}</option>
               ))}
             </select>
-          </label>
-          {skills.map((key) => (
-            <label key={key}>
-              {labels[key]} (0–100)
-              <input
-                type="number"
-                min={0}
-                max={100}
-                value={form[key]}
-                onChange={(e) => setForm({ ...form, [key]: parseInt(e.target.value, 10) || 0 })}
-                style={{ display: "block", marginTop: 4, padding: 8, width: "100%", borderRadius: 6, backgroundColor: "#1a1a2e", color: "#eee" }}
-              />
-            </label>
-          ))}
-          {error && <p style={{ color: "#e94560" }}>{error}</p>}
-          <button type="submit" disabled={submitting} style={{ padding: 12, backgroundColor: "#e94560", border: "none", borderRadius: 6, color: "#fff", cursor: "pointer" }}>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {skills.map((key) => (
+              <div key={key}>
+                <label className="block text-white mb-2">{labels[key]} (0–100)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={form[key]}
+                  onChange={(e) => setForm({ ...form, [key]: parseInt(e.target.value, 10) || 0 })}
+                  className="input w-full"
+                />
+              </div>
+            ))}
+          </div>
+
+          {error && <p className="text-danger">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn btn-primary w-full sm:w-auto px-8 py-3"
+          >
             {submitting ? "Submitting..." : "Submit evaluation"}
           </button>
         </form>

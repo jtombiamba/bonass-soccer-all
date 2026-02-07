@@ -12,9 +12,9 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
         {/* Polls Card */}
-        <div className="card-dark p-6">
+        <div className="card-modern p-6">
           <div className="flex items-center mb-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
               <svg
@@ -52,7 +52,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Evaluations Card */}
-        <div className="card-dark p-6">
+        <div className="card-modern p-6">
           <div className="flex items-center mb-4">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
               <svg
@@ -82,7 +82,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Teams Card */}
-        <div className="card-dark p-6">
+        <div className="card-modern p-6">
           <div className="flex items-center mb-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
               <svg
@@ -112,7 +112,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Profile Card */}
-        <div className="card-dark p-6">
+        <div className="card-modern p-6">
           <div className="flex items-center mb-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
               <svg

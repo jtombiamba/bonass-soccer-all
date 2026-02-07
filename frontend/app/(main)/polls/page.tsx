@@ -52,67 +52,82 @@ export default function PollsPage() {
     }
   }
 
-  if (loading) return <p>Loading polls...</p>;
+  if (loading) return <p className="text-white">Loading polls...</p>;
 
   return (
-    <div>
-      <h1>Weekly Polls</h1>
-      <p style={{ marginTop: 8, marginBottom: 16 }}>Answer whether you are available for the Friday game.</p>
-      {message && <p style={{ color: "#e94560", marginBottom: 12 }}>{message}</p>}
-      <ul style={{ listStyle: "none" }}>
-        {polls.map((poll) => {
-          const lockMessage = poll.is_locked
-            ? poll.hard_lock
-              ? "Hard locked (Wednesday noon)"
-              : poll.locked_by_max
-                ? "Locked (max players reached)"
-                : "Locked"
-            : "";
-          return (
-            <li key={poll.id} style={pollItemStyle}>
-              <div>
-                <strong>Game: {poll.game_date}</strong>
-                <div style={{ fontSize: 14, color: "#aaa", marginTop: 4 }}>
-                  {poll.available_count} / {poll.max_players} players (min {poll.min_players})
-                  {lockMessage && <span style={{ color: "#e94560", marginLeft: 8 }}>🔒 {lockMessage}</span>}
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">Weekly Polls</h1>
+        <p className="text-gray-300">
+          Answer whether you are available for the Friday game.
+        </p>
+      </div>
+
+      {message && <p className="text-danger mb-4">{message}</p>}
+
+      {polls.length === 0 ? (
+        <p className="text-gray-400">No polls yet. A new poll is launched every Monday for the Friday game.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {polls.map((poll) => {
+            const lockMessage = poll.is_locked
+              ? poll.hard_lock
+                ? "Hard locked (Wednesday noon)"
+                : poll.locked_by_max
+                  ? "Locked (max players reached)"
+                  : "Locked"
+              : "";
+
+            return (
+              <div key={poll.id} className="card-modern">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-bold text-white">Game: {poll.game_date}</h3>
+                  {lockMessage && (
+                    <span className="text-xs font-semibold bg-danger text-white px-2 py-1 rounded-full">
+                      🔒 {lockMessage}
+                    </span>
+                  )}
                 </div>
-                <div style={{ marginTop: 8 }}>
+
+                <div className="text-gray-300 mb-4">
+                  <p>
+                    {poll.available_count} / {poll.max_players} players (min {poll.min_players})
+                  </p>
+                  <p className="text-sm mt-2">
+                    Responses: {poll.responses.filter((r) => r.available).length} available
+                  </p>
+                  <p className="text-sm">Game status: {poll.game_status}</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 mb-4">
                   <button
                     type="button"
                     onClick={() => answerPoll(poll.id, true)}
                     disabled={answering === poll.id || poll.is_locked}
-                    style={btnStyle(true)}
+                    className="btn btn-primary flex-1 py-3"
                   >
-                    Available
+                    {answering === poll.id ? "Saving..." : "Available"}
                   </button>
                   <button
                     type="button"
                     onClick={() => answerPoll(poll.id, false)}
                     disabled={answering === poll.id || poll.is_locked}
-                    style={btnStyle(false)}
+                    className="btn btn-danger flex-1 py-3"
                   >
-                    Not available
+                    {answering === poll.id ? "Saving..." : "Not available"}
                   </button>
                 </div>
+
                 {poll.is_locked && (
-                  <div style={{ fontSize: 12, color: "#ffaa00", marginTop: 4 }}>
+                  <div className="text-warning text-sm border-t border-surface-light pt-3">
                     Poll locked. You cannot change your answer.
                   </div>
                 )}
               </div>
-              <div style={{ fontSize: 14, color: "#aaa" }}>
-                Responses: {poll.responses.filter((r) => r.available).length} available
-                <br />
-                Game status: {poll.game_status}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      {polls.length === 0 && <p>No polls yet. A new poll is launched every Monday for the Friday game.</p>}
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
-
-const pollItemStyle: React.CSSProperties = { padding: 16, marginBottom: 12, backgroundColor: "#1a1a2e", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" };
-const btnStyle = (available: boolean): React.CSSProperties => ({ marginRight: 8, padding: "8px 16px", border: "none", borderRadius: 6, backgroundColor: available ? "#0f3460" : "#e94560", color: "#fff", cursor: "pointer" });

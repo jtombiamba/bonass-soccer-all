@@ -74,26 +74,55 @@ export default function ProfilePage() {
     }
   }
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-white">Loading...</p>;
 
   return (
-    <div>
-      <h1>Player profile</h1>
-      <p style={{ marginTop: 8, marginBottom: 16 }}>Your name comes from your account; here you set your pseudo and phone for the group.</p>
-      {message && <p style={{ color: "#e94560", marginBottom: 12 }}>{message}</p>}
-      <form onSubmit={profile ? handleUpdate : handleCreate} style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 400 }}>
-        <label>
-          Pseudo
-          <input type="text" value={pseudo} onChange={(e) => setPseudo(e.target.value)} placeholder="Your pseudo" required style={{ display: "block", marginTop: 4, padding: 8, width: "100%", borderRadius: 6, backgroundColor: "#1a1a2e", color: "#eee" }} />
-        </label>
-        <label>
-          Phone
-          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1234567890" style={{ display: "block", marginTop: 4, padding: 8, width: "100%", borderRadius: 6, backgroundColor: "#1a1a2e", color: "#eee" }} />
-        </label>
-        <button type="submit" disabled={saving} style={{ padding: 12, backgroundColor: "#e94560", border: "none", borderRadius: 6, color: "#fff", cursor: "pointer" }}>
-          {saving ? "Saving..." : profile ? "Update profile" : "Create profile"}
-        </button>
-      </form>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">Player profile</h1>
+        <p className="text-gray-300">
+          Your name comes from your account; here you set your pseudo and phone for the group.
+        </p>
+      </div>
+
+      {message && (
+        <div className={`alert ${message.includes("created") || message.includes("updated") ? "alert-success" : "alert-error"}`}>
+          {message}
+        </div>
+      )}
+
+      <div className="card-modern max-w-2xl">
+        <form onSubmit={profile ? handleUpdate : handleCreate} className="space-y-6">
+          <div>
+            <label className="block text-white mb-2">Pseudo</label>
+            <input
+              type="text"
+              value={pseudo}
+              onChange={(e) => setPseudo(e.target.value)}
+              placeholder="Your pseudo"
+              required
+              className="input w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-white mb-2">Phone</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1234567890"
+              className="input w-full"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="btn btn-primary w-full sm:w-auto px-8 py-3"
+          >
+            {saving ? "Saving..." : profile ? "Update profile" : "Create profile"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

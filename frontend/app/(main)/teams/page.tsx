@@ -104,68 +104,143 @@ export default function TeamsPage() {
     }
   }
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-white">Loading...</p>;
 
   return (
-    <div>
-      <h1>Teams & Games</h1>
-      <p style={{ marginTop: 8, marginBottom: 16 }}>
-        Submit your physical condition (day before game), view teams, submit final score, or launch team distribution with the code.
-      </p>
-      {message && <p style={{ color: "#e94560", marginBottom: 12 }}>{message}</p>}
-      <ul style={{ listStyle: "none" }}>
-        {games.map((game) => (
-          <li key={game.id} style={{ padding: 16, marginBottom: 12, backgroundColor: "#1a1a2e", borderRadius: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-              <strong>Game: {game.game_date}</strong>
-              <span>Score: {game.team_a_goals} – {game.team_b_goals}</span>
-            </div>
-            <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <label>Physical condition (0–100):</label>
-                <input type="number" min={0} max={100} value={physicalScore[game.id] ?? ""} onChange={(e) => setPhysicalScore((s) => ({ ...s, [game.id]: e.target.value }))} style={{ width: 60, padding: 6, borderRadius: 6, backgroundColor: "#0f3460", color: "#eee" }} />
-                <button type="button" onClick={() => submitPhysicalCondition(game.id)} style={btnStyle}>Save</button>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">Teams & Games</h1>
+        <p className="text-gray-300">
+          Submit your physical condition (day before game), view teams, submit final score, or launch team distribution with the code.
+        </p>
+      </div>
+
+      {message && <p className="text-danger mb-4">{message}</p>}
+
+      {games.length === 0 ? (
+        <p className="text-gray-400">No games yet. A new poll (and game) is created every Monday for the Friday game.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {games.map((game) => (
+            <div key={game.id} className="card-modern">
+              {/* Game header */}
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-white">Game: {game.game_date}</h3>
+                <span className="text-lg font-semibold text-white">
+                  {game.team_a_goals} – {game.team_b_goals}
+                </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <label>Final score (A – B):</label>
-                <input type="number" min={0} value={scoreForm[game.id]?.a ?? ""} onChange={(e) => setScoreForm((s) => ({ ...s, [game.id]: { ...(s[game.id] || { a: "", b: "" }), a: e.target.value } }))} style={{ width: 50, padding: 6, borderRadius: 6, backgroundColor: "#0f3460", color: "#eee" }} />
-                <span>–</span>
-                <input type="number" min={0} value={scoreForm[game.id]?.b ?? ""} onChange={(e) => setScoreForm((s) => ({ ...s, [game.id]: { ...(s[game.id] || { a: "", b: "" }), b: e.target.value } }))} style={{ width: 50, padding: 6, borderRadius: 6, backgroundColor: "#0f3460", color: "#eee" }} />
-                <button type="button" onClick={() => submitScore(game.id)} style={btnStyle}>Save score</button>
+
+              {/* Physical condition */}
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Physical condition (0–100)</label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={physicalScore[game.id] ?? ""}
+                    onChange={(e) => setPhysicalScore((s) => ({ ...s, [game.id]: e.target.value }))}
+                    className="input flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => submitPhysicalCondition(game.id)}
+                    className="btn btn-primary whitespace-nowrap"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
+
+              {/* Final score */}
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Final score (A – B)</label>
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <input
+                    type="number"
+                    min={0}
+                    value={scoreForm[game.id]?.a ?? ""}
+                    onChange={(e) => setScoreForm((s) => ({ ...s, [game.id]: { ...(s[game.id] || { a: "", b: "" }), a: e.target.value } }))}
+                    className="input w-16 text-center"
+                  />
+                  <span className="text-white">–</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={scoreForm[game.id]?.b ?? ""}
+                    onChange={(e) => setScoreForm((s) => ({ ...s, [game.id]: { ...(s[game.id] || { a: "", b: "" }), b: e.target.value } }))}
+                    className="input w-16 text-center"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => submitScore(game.id)}
+                    className="btn btn-primary flex-1 sm:flex-none"
+                  >
+                    Save score
+                  </button>
+                </div>
+              </div>
+
+              {/* Distribution code */}
               {game.distribution_code ? (
                 game.code_sent_to_player_pseudo === currentPlayerPseudo ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <label>Distribution code:</label>
-                    <input type="text" value={assignCode[game.id] ?? ""} onChange={(e) => setAssignCode((s) => ({ ...s, [game.id]: e.target.value }))} placeholder="Code received" style={{ width: 200, padding: 6, borderRadius: 6, backgroundColor: "#0f3460", color: "#eee" }} />
-                    <button type="button" onClick={() => launchDistribution(game.id)} style={btnStyle}>Launch teams</button>
+                  <div className="mb-4">
+                    <label className="block text-gray-300 mb-2">Distribution code</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        type="text"
+                        value={assignCode[game.id] ?? ""}
+                        onChange={(e) => setAssignCode((s) => ({ ...s, [game.id]: e.target.value }))}
+                        placeholder="Code received"
+                        className="input flex-1"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => launchDistribution(game.id)}
+                        className="btn btn-primary whitespace-nowrap"
+                      >
+                        Launch teams
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: 14, color: "#aaa" }}>
+                  <div className="text-gray-400 text-sm mb-4">
                     Distribution code already sent to <strong>{game.code_sent_to_player_pseudo}</strong>.
                   </div>
                 )
               ) : (
-                <div style={{ fontSize: 14, color: "#aaa" }}>
+                <div className="text-gray-400 text-sm mb-4">
                   No distribution code yet.
                 </div>
               )}
+
+              {/* Show/hide teams */}
+              <button
+                type="button"
+                onClick={() => selectedGame?.id === game.id ? setSelectedGame(null) : loadGameDetails(game.id)}
+                className="btn btn-secondary w-full mb-4"
+              >
+                {selectedGame?.id === game.id ? "Hide teams" : "Show teams"}
+              </button>
+
+              {/* Team details */}
+              {selectedGame?.id === game.id && selectedGame.teams && (
+                <div className="bg-surface-light rounded-lg p-4">
+                  <h4 className="font-bold text-white mb-2">Team A</h4>
+                  <p className="text-gray-300 mb-3">
+                    {selectedGame.teams.find((t) => t.side === "A")?.players?.map((p) => p.pseudo).join(", ") || "—"}
+                  </p>
+                  <h4 className="font-bold text-white mb-2">Team B</h4>
+                  <p className="text-gray-300">
+                    {selectedGame.teams.find((t) => t.side === "B")?.players?.map((p) => p.pseudo).join(", ") || "—"}
+                  </p>
+                </div>
+              )}
             </div>
-            <button type="button" onClick={() => selectedGame?.id === game.id ? setSelectedGame(null) : loadGameDetails(game.id)} style={{ marginTop: 8, ...btnStyle }}>
-              {selectedGame?.id === game.id ? "Hide teams" : "Show teams"}
-            </button>
-            {selectedGame?.id === game.id && selectedGame.teams && (
-              <div style={{ marginTop: 12, padding: 12, backgroundColor: "#0f3460", borderRadius: 8 }}>
-                <p><strong>Team A:</strong> {selectedGame.teams.find((t) => t.side === "A")?.players?.map((p) => p.pseudo).join(", ") || "—"}</p>
-                <p><strong>Team B:</strong> {selectedGame.teams.find((t) => t.side === "B")?.players?.map((p) => p.pseudo).join(", ") || "—"}</p>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-      {games.length === 0 && <p>No games yet. A new poll (and game) is created every Monday for the Friday game.</p>}
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
-const btnStyle: React.CSSProperties = { padding: "6px 12px", backgroundColor: "#e94560", border: "none", borderRadius: 6, color: "#fff", cursor: "pointer" };
