@@ -3,6 +3,7 @@
 name = "bonass-soccer-backend"
 version = "1.0.0"
 description = "Football Team Management Backend"
+package-mode = false  # Add this line
 authors = [
     {name = "Bonass Soccer Team"}
 ]
