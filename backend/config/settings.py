@@ -9,6 +9,7 @@ env = environ.Env(
     DEBUG=(bool, True),
     ALLOWED_HOSTS=(list, ["*"]),
     CORS_ALLOWED_ORIGINS=(list, ["http://localhost:3000", "http://127.0.0.1:3000"]),
+    CORS_ALLOWED_ORIGIN_REGEXES=(list, [r'^https?://backend-[a-z0-9]+-\d+:\d+$']),
     EMAIL_BACKEND=(str, "django.core.mail.backends.console.EmailBackend"),
     EMAIL_HOST=(str, ""),
     EMAIL_PORT=(int, 587),
@@ -135,6 +136,7 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000", "http://127.0.0.1:3000", "https://app.bonass-soccer.tombislab.com", "http://app.bonass-soccer.tombislab.com"])
+CORS_ALLOWED_ORIGIN_REGEXES = env.list("CORS_ALLOWED_ORIGIN_REGEXES", default=[r'^https?://backend-[a-z0-9]+-\d+:\d+$'])
 CORS_ALLOW_CREDENTIALS = True
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
